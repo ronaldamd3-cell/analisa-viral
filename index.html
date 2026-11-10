@@ -204,15 +204,19 @@ svg rect{transform-origin:bottom;transform-box:fill-box;animation:grow2 .9s cubi
       <select id="per"><option value="0">Semua video</option><option value="30">30 hari terakhir</option><option value="7">7 hari terakhir</option></select>
       <p class="hint">Filter periode jalan kalau datamu punya kolom tanggal.</p>
     </div>
+    <div id="out"></div>
     <div class="card">
-      <label for="d">Data video</label>
-      <textarea id="d" placeholder="satu video per baris:&#10;caption | views | likes | komentar | share | tanggal(opsional)&#10;&#10;Contoh:&#10;Racun TikTok Shop sepatu lari murah #racuntiktok | 250000 | 18000 | 420 | 900 | 2026-11-02"></textarea>
-      <div class="btns"><button id="ex" class="g sm">Isi contoh data</button><button id="rs" class="g sm">Kosongkan data</button></div>
-      <label for="f" style="margin-top:16px">Atau unggah file CSV / ZIP</label>
+      <label for="f">Unggah file CSV / ZIP</label>
       <input type="file" id="f" accept=".csv,.tsv,.txt,.zip">
       <p class="hint" id="fs">Hasil ekspor TikTok Studio (desktop: Analytics, Export Data) atau tool riset. Kolom dikenali otomatis, baik berbahasa Indonesia maupun Inggris.</p>
+      <label for="cu" style="margin-top:16px">Atau muat otomatis dari link CSV</label>
+      <div class="row"><input id="cu" type="url" placeholder="tempel link Google Sheets (diterbitkan) atau file CSV GitHub" autocomplete="off" autocapitalize="off"><button id="cl" class="g">Muat</button></div>
+      <label class="tick" style="text-transform:none;letter-spacing:0;font-size:13px;color:var(--tx);font-weight:500;margin:12px 0 0"><input type="checkbox" id="ca" style="width:18px;height:18px;padding:0;accent-color:var(--ac);box-shadow:none"> Muat dan analisa otomatis setiap halaman dibuka</label>
+      <p class="hint" id="cs">Google Sheets: File, Bagikan, Terbitkan ke web, pilih tab yang dipakai dan format CSV, lalu salin link-nya. Link file di GitHub (yang berisi /blob/) juga dikenali. Kolom yang dibutuhkan sama seperti unggah file: caption/judul dan views.</p>
+      <label for="d" style="margin-top:18px">Data video (hasil unggah atau link masuk ke sini, bisa juga diketik)</label>
+      <textarea id="d" placeholder="satu video per baris:&#10;caption | views | likes | komentar | share | tanggal(opsional)&#10;&#10;Contoh:&#10;Racun TikTok Shop sepatu lari murah #racuntiktok | 250000 | 18000 | 420 | 900 | 2026-11-02"></textarea>
+      <div class="btns"><button id="ex" class="g sm">Isi contoh data</button><button id="rs" class="g sm">Kosongkan data</button></div>
     </div>
-    <div id="out"></div>
   </div>
 
   <div id="t-tren" class="tab" hidden>
@@ -315,7 +319,7 @@ const toks=s=>(String(s).toLowerCase().match(/#?[a-z0-9]{3,}/g)||[]).map(w=>w.re
 })();
 
 /* ---------- simpan isian otomatis ---------- */
-const KEEP=['u','pn','pf','pt','gy','per','d','tm'];
+const KEEP=['u','pn','pf','pt','gy','per','d','tm','cu'];
 KEEP.forEach(id=>{
   try{const v=localStorage.getItem('apv_'+id);if(v!==null)$(id).value=v}catch(e){}
   $(id).addEventListener('input',()=>{try{localStorage.setItem('apv_'+id,$(id).value)}catch(e){}});
@@ -397,6 +401,37 @@ $('f').addEventListener('change',async e=>{
     st.textContent=lines.length+' video terbaca dari '+src+'. Klik Analisa untuk memproses.';
   }catch(err){st.textContent='File gagal dibaca. Coba simpan ulang sebagai CSV (UTF-8).'}
 });
+
+/* ---------- muat dari link CSV ---------- */
+function fixUrl(u){
+  u=u.trim();
+  let m=u.match(/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/);
+  if(m)return 'https://raw.githubusercontent.com/'+m[1]+'/'+m[2]+'/'+m[3].split('?')[0];
+  m=u.match(/docs\.google\.com\/spreadsheets\/d\/([\w-]+)/);
+  if(m&&!/\/d\/e\//.test(u)){const g=u.match(/[#&?]gid=(\d+)/);return 'https://docs.google.com/spreadsheets/d/'+m[1]+'/export?format=csv'+(g?'&gid='+g[1]:'')}
+  return u;
+}
+async function loadUrl(auto){
+  const st=$('cs'),raw=$('cu').value.trim();
+  if(!raw){st.textContent='Tempel link CSV dulu.';return}
+  if(!/^https:\/\//i.test(raw)){st.textContent='Link harus diawali https://';return}
+  st.textContent='Mengambil data...';$('cl').disabled=true;
+  try{
+    const r=await fetch(fixUrl(raw),{cache:'no-store'});
+    if(!r.ok)throw new Error('status '+r.status);
+    const lines=csvToLines(await r.text());
+    if(!lines||!lines.length){st.textContent='Link terbaca, tapi kolom tidak dikenali. Pastikan ada baris header dengan kolom caption/judul dan views.';return}
+    $('d').value=lines.join('\n');$('d').dispatchEvent(new Event('input'));
+    st.textContent=lines.length+' video dimuat dari link pada '+new Date().toLocaleString('id-ID')+'.';
+    if(auto)$('go').click();else st.textContent+=' Klik Analisa untuk memproses.';
+  }catch(e){
+    st.textContent='Gagal mengambil data dari link. Untuk Google Sheets, pakai link dari Terbitkan ke web (format CSV), bukan link Bagikan biasa. Untuk GitHub, pastikan repo-nya Public. ('+(e.message||'error')+')';
+  }finally{$('cl').disabled=false}
+}
+$('cl').onclick=()=>loadUrl(false);
+$('cu').addEventListener('keydown',e=>{if(e.key==='Enter')loadUrl(false)});
+try{$('ca').checked=localStorage.getItem('apv_ca')==='1'}catch(e){}
+$('ca').addEventListener('change',()=>{try{localStorage.setItem('apv_ca',$('ca').checked?'1':'0')}catch(e){}});
 
 /* ---------- analisa ---------- */
 function analyze(rows){
@@ -675,6 +710,7 @@ document.addEventListener('click',e=>{
 });
 $('pn').addEventListener('input',()=>{if(!$('t-alur').hidden)renderFlow()});
 fromHash();
+if($('ca').checked&&$('cu').value.trim())loadUrl(true);
 renderFlow();
 </script>
 </body>
