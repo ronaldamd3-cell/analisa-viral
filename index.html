@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2C3359">
+<title>Analisa Produk Viral TikTok</title>
+<meta name="description" content="Analisa data video TikTok, cek tren dan momen belanja, lalu buat prompt video, deskripsi, dan hashtag. Semua dihitung di browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232C3359'/%3E%3Cpath d='M14 44l12-14 9 8 15-20' fill='none' stroke='%23F2BE5C' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1b2040;--bg2:#2C3359;--card:rgba(242,237,228,.065);--card2:rgba(242,237,228,.11);
+  --tx:#F2EDE4;--mu:#aeb4c9;--bd:rgba(242,237,228,.15);
+  --ac:#F2BE5C;--ac2:#75B8BF;--gold:#F2BE5C;--ok:#9fe0bf;--bad:#f09a8e;
+  --sh:0 24px 60px -24px rgba(0,0,0,.8),0 2px 0 rgba(255,255,255,.06) inset;
+  --serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --sans:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root{
+  --bg:#F2EDE4;--bg2:#DAEDE2;--card:rgba(255,255,255,.7);--card2:rgba(255,255,255,.95);
+  --tx:#2C3359;--mu:#5f6683;--bd:rgba(44,51,89,.16);--gold:#a8741a;--ac2:#4f9aa3;--ok:#2f8f66;--bad:#c9564a;
+  --sh:0 24px 50px -26px rgba(60,40,90,.35),0 2px 0 rgba(255,255,255,.9) inset;color-scheme:light}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.65 var(--sans);overflow-x:hidden;min-height:100vh}
+
+/* ===== latar 3D ===== */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:
+  radial-gradient(900px 520px at 50% -8%,rgba(117,184,191,.2),transparent 70%),
+  radial-gradient(1100px 700px at 50% 112%,rgba(242,190,92,.1),transparent 70%),
+  linear-gradient(180deg,var(--bg2),var(--bg) 60%)}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:float 18s ease-in-out infinite}
+.o1{width:440px;height:440px;background:#F2BE5C;left:-140px;top:6%;opacity:.16}
+.o2{width:400px;height:400px;background:#75B8BF;right:-120px;top:32%;animation-delay:-6s;opacity:.28}
+.o3{width:340px;height:340px;background:#DAEDE2;left:30%;bottom:-130px;animation-delay:-11s;opacity:.12}
+@media (prefers-color-scheme:light){.o1{opacity:.4}.o2{opacity:.3}.o3{background:#fff;opacity:.7}.bg{background:radial-gradient(900px 520px at 50% -8%,rgba(255,255,255,.85),transparent 70%),linear-gradient(180deg,var(--bg),var(--bg2))}}
+@keyframes float{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(40px,-50px,0) scale(1.12)}}
+.floor{position:absolute;left:-50%;right:-50%;bottom:-10%;height:55%;
+  background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px);
+  background-size:64px 64px;transform:perspective(520px) rotateX(64deg);transform-origin:center top;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 40%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 40%,transparent);
+  animation:grid 6s linear infinite;opacity:.55}
+@keyframes grid{to{background-position:0 64px}}
+
+.w{max-width:860px;margin:0 auto;padding:28px 16px 70px;perspective:1400px}
+
+/* ===== hero ===== */
+.hero{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:6px 0 26px}
+.eyebrow{font-size:11.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);font-weight:700}
+h1{font:600 clamp(34px,7vw,56px)/1.02 var(--serif);margin:8px 0 10px;letter-spacing:-.01em}
+h1 em{font-style:italic;font-weight:500;background:linear-gradient(100deg,var(--gold),var(--ac) 55%,var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% 100%;animation:shine 7s linear infinite}
+@keyframes shine{to{background-position:200% 0}}
+.sub{color:var(--mu);margin:0;max-width:520px}
+.scene{width:110px;height:110px;flex:none;perspective:600px}
+.cube{position:relative;width:70px;height:70px;margin:20px;transform-style:preserve-3d;animation:spin 16s linear infinite}
+.cube i{position:absolute;inset:0;border:1px solid var(--bd);border-radius:12px;backdrop-filter:blur(2px);
+  background:linear-gradient(135deg,rgba(242,190,92,.4),rgba(117,184,191,.35));box-shadow:0 0 30px rgba(242,190,92,.25) inset}
+.cube i:nth-child(1){transform:translateZ(35px)}
+.cube i:nth-child(2){transform:rotateY(180deg) translateZ(35px)}
+.cube i:nth-child(3){transform:rotateY(90deg) translateZ(35px)}
+.cube i:nth-child(4){transform:rotateY(-90deg) translateZ(35px)}
+.cube i:nth-child(5){transform:rotateX(90deg) translateZ(35px)}
+.cube i:nth-child(6){transform:rotateX(-90deg) translateZ(35px)}
+@keyframes spin{to{transform:rotateX(360deg) rotateY(720deg)}}
+
+/* ===== navigasi ===== */
+.nav{display:flex;gap:8px;overflow-x:auto;margin:0 0 18px;padding:8px 4px 14px;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nv{flex:none;background:var(--card);color:var(--tx);border:1px solid var(--bd);padding:9px 16px;border-radius:99px;font:600 13.5px var(--sans);
+  backdrop-filter:blur(14px);box-shadow:0 5px 0 rgba(0,0,0,.35);transition:transform .18s,box-shadow .18s,background .25s}
+.nv:hover{transform:translateY(-2px)}
+.nv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.nv.on{background:linear-gradient(135deg,#F2BE5C,#e3a53a);color:#2C3359;border-color:transparent;box-shadow:0 5px 0 #a8741a,0 14px 30px -10px rgba(242,190,92,.7)}
+
+/* ===== kartu 3D kaca ===== */
+.tab:not([hidden]){animation:tabin .55s cubic-bezier(.2,.8,.2,1)}
+@keyframes tabin{from{opacity:0;transform:translateY(18px) rotateX(8deg)}to{opacity:1;transform:none}}
+.card{position:relative;background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:22px;margin-bottom:18px;
+  backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);box-shadow:var(--sh);
+  transform-style:preserve-3d;transition:transform .25s ease-out,box-shadow .3s;
+  animation:rise .7s cubic-bezier(.2,.8,.2,1) backwards}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.1),transparent 60%);opacity:0;transition:opacity .3s}
+.card:hover::before{opacity:1}
+.card:hover{box-shadow:0 34px 70px -26px rgba(0,0,0,.85),0 2px 0 rgba(255,255,255,.08) inset}
+@keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+#out>.card:nth-child(2),#rt>.card:nth-child(2){animation-delay:.08s}
+#out>.card:nth-child(3),#rt>.card:nth-child(3){animation-delay:.16s}
+#out>.card:nth-child(4),#rt>.card:nth-child(4){animation-delay:.24s}
+#out>.card:nth-child(5),#rt>.card:nth-child(5){animation-delay:.32s}
+#rp>.card:nth-child(2),#rd>.card:nth-child(2){animation-delay:.1s}
+#rp>.card:nth-child(3),#rd>.card:nth-child(3){animation-delay:.2s}
+
+h2{font:600 24px/1.2 var(--serif);margin:0 0 12px;letter-spacing:.01em}
+h3{font:600 12px var(--sans);margin:20px 0 8px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+label{display:block;font-weight:700;margin:0 0 7px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
+.row{display:flex;gap:10px}
+input,textarea,select{width:100%;padding:13px 14px;border:1px solid var(--bd);border-radius:14px;background:rgba(0,0,0,.22);color:var(--tx);font:inherit;
+  transition:border-color .2s,box-shadow .2s,background .2s;box-shadow:inset 0 2px 6px rgba(0,0,0,.25)}
+@media (prefers-color-scheme:light){input,textarea,select{background:rgba(255,255,255,.7);box-shadow:inset 0 2px 5px rgba(60,40,90,.1)}}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--ac2);box-shadow:0 0 0 4px rgba(117,184,191,.25),inset 0 2px 6px rgba(0,0,0,.2)}
+textarea{min-height:140px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+input[type=file]{padding:10px;cursor:pointer}
+input[type=file]::file-selector-button{margin-right:12px;border:0;border-radius:10px;padding:8px 14px;background:var(--card2);color:var(--tx);font:600 13px var(--sans);cursor:pointer}
+button{padding:12px 22px;border:0;border-radius:14px;background:linear-gradient(135deg,#F2BE5C,#e3a53a);color:#2C3359;font:700 14px var(--sans);cursor:pointer;white-space:nowrap;
+  box-shadow:0 5px 0 #a8741a,0 16px 28px -12px rgba(242,190,92,.6);transition:transform .15s,box-shadow .15s,filter .2s}
+button:hover{transform:translateY(-2px);filter:brightness(1.06)}
+button:active{transform:translateY(4px);box-shadow:0 1px 0 #a8741a,0 6px 12px -8px rgba(242,190,92,.6)}
+button.g{background:var(--card2);color:var(--tx);border:1px solid var(--bd);box-shadow:0 4px 0 rgba(0,0,0,.35)}
+button.g:active{box-shadow:0 1px 0 rgba(0,0,0,.35)}
+button:disabled{opacity:.5}
+.sm{padding:7px 14px;font-size:12.5px;border-radius:11px}
+.hint{font-size:12.5px;color:var(--mu);margin:8px 0 0}
+.warn{border-left:3px solid var(--gold);color:var(--mu);font-size:13px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px;margin-bottom:6px}
+.st{border:1px solid var(--bd);border-radius:16px;padding:14px;background:linear-gradient(160deg,var(--card2),transparent);transition:transform .25s}
+.st:hover{transform:translateY(-4px) translateZ(20px)}
+.st b{display:block;font:600 34px/1.1 var(--serif);background:linear-gradient(120deg,var(--tx),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.st span{font-size:12px;color:var(--mu)}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+th,td{text-align:left;padding:10px 10px;border-bottom:1px solid var(--bd);white-space:nowrap}
+tr:hover td{background:rgba(255,255,255,.04)}
+td.c{white-space:normal;min-width:190px}
+.bar{height:7px;background:var(--bd);border-radius:6px;min-width:64px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));border-radius:6px;transform-origin:left;animation:grow 1.1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.tag{display:inline-block;padding:3px 11px;border-radius:99px;background:var(--card2);border:1px solid var(--bd);font-size:12px;margin:3px 4px 3px 0}
+.big p{margin:8px 0;font-size:16px}
+.steps{padding-left:22px;margin:0}.steps li{margin-bottom:10px}.steps li::marker{color:var(--gold);font-weight:700}
+.rk{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.rk.top{align-items:flex-start}
+.no{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#2C3359;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none;
+  box-shadow:0 4px 0 rgba(0,0,0,.3),0 8px 18px -6px rgba(242,190,92,.55)}
+.pre{white-space:pre-wrap;background:rgba(0,0,0,.25);border:1px solid var(--bd);border-radius:14px;padding:14px;font-size:13px;margin:0 0 10px;font-family:ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:light){.pre{background:rgba(255,255,255,.7)}}
+#pv img{max-width:100%;max-height:280px;border-radius:16px;margin-top:12px;box-shadow:0 22px 40px -16px rgba(0,0,0,.7);animation:rise .6s both}
+.up{color:var(--ok);font-weight:700}.dn{color:var(--bad);font-weight:700}
+.tr{flex:1;min-width:0}
+svg rect{transform-origin:bottom;transform-box:fill-box;animation:grow2 .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow2{from{transform:scaleY(0)}}
+.foot{text-align:center;color:var(--mu);font-size:12px;margin-top:30px;letter-spacing:.06em}
+.prog{height:10px;border-radius:99px;background:var(--bd);overflow:hidden;margin:6px 0 4px;box-shadow:inset 0 2px 4px rgba(0,0,0,.25)}
+.prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.flow{position:relative;margin-top:18px}
+.flow::before{content:"";position:absolute;left:31px;top:24px;bottom:24px;width:2px;background:linear-gradient(var(--ac),var(--ac2));opacity:.4}
+.stp{position:relative;display:flex;gap:16px;align-items:flex-start;margin-bottom:12px;padding:14px 16px;border:1px solid var(--bd);border-radius:18px;background:linear-gradient(160deg,var(--card2),transparent);transition:transform .25s;animation:rise .6s backwards}
+.stp:hover{transform:translateX(6px)}
+.stp .no{position:relative;z-index:1}
+.stp.ok .no{background:linear-gradient(135deg,var(--ok),var(--ac2))}
+.stp b{font:600 19px var(--serif)}
+.stp p{margin:2px 0 8px;font-size:13px;color:var(--mu)}
+.lst{padding-left:20px;margin:6px 0}.lst li{margin-bottom:8px}
+
+.nv:focus-visible,button:focus-visible{outline:2px solid var(--ac2);outline-offset:3px}
+.tick{display:inline-flex;gap:8px;align-items:center}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+@media (max-width:560px){.scene{display:none}.row{flex-direction:column}.card{padding:18px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="floor"></div></div>
+<div class="w">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Studio Riset Konten</div>
+      <h1>Analisa Produk <em>Viral</em> TikTok</h1>
+      <p class="sub">Analisa data videomu, cari produk yang sedang naik, lalu buat prompt video, deskripsi, dan hashtag. Semua dihitung di browser, tanpa login dan tanpa API key.</p>
+    </div>
+    <div class="scene" aria-hidden="true"><div class="cube"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+  </header>
+  <div class="nav" role="tablist" aria-label="Menu utama">
+    <button class="nv on" role="tab" aria-selected="true" data-t="alur">Alur</button>
+    <button class="nv" role="tab" aria-selected="false" data-t="analisa">Analisa</button>
+    <button class="nv" role="tab" aria-selected="false" data-t="tren">Tren dan prediksi</button>
+    <button class="nv" role="tab" aria-selected="false" data-t="foto">Foto</button>
+    <button class="nv" role="tab" aria-selected="false" data-t="prompt">Prompt video</button>
+    <button class="nv" role="tab" aria-selected="false" data-t="desk">Deskripsi</button>
+    <button class="nv" role="tab" aria-selected="false" data-t="hash">Hashtag</button>
+  </div>
+
+  <div id="t-alur" class="tab">
+    <div class="card">
+      <h2>Alur kerja dari data sampai posting</h2>
+      <p class="hint" style="margin-top:0">Ikuti urutan ini. Langkah yang sudah kamu isi ditandai otomatis. Langkah di luar aplikasi bisa kamu tandai sendiri.</p>
+      <div id="fl"></div>
+    </div>
+  </div>
+
+  <div id="t-analisa" class="tab" hidden>
+    <div class="card">
+      <label for="u">Username TikTok (untuk label laporan)</label>
+      <div class="row"><input id="u" placeholder="contoh: namaakun (tanpa @)" autocomplete="off" autocapitalize="off"><button id="go">Analisa</button></div>
+      <p class="hint">Halaman ini tidak mengambil data dari TikTok (diblokir platform). Data berasal dari CSV/ZIP ekspor atau hasil ketikan kamu di bawah.</p>
+      <label for="per" style="margin-top:14px">Periode yang dianalisa</label>
+      <select id="per"><option value="0">Semua video</option><option value="30">30 hari terakhir</option><option value="7">7 hari terakhir</option></select>
+      <p class="hint">Filter periode jalan kalau datamu punya kolom tanggal.</p>
+    </div>
+    <div class="card">
+      <label for="d">Data video</label>
+      <textarea id="d" placeholder="satu video per baris:&#10;caption | views | likes | komentar | share | tanggal(opsional)&#10;&#10;Contoh:&#10;Racun TikTok Shop sepatu lari murah #racuntiktok | 250000 | 18000 | 420 | 900 | 2026-11-02"></textarea>
+      <div class="btns"><button id="ex" class="g sm">Isi contoh data</button><button id="rs" class="g sm">Kosongkan data</button></div>
+      <label for="f" style="margin-top:16px">Atau unggah file CSV / ZIP</label>
+      <input type="file" id="f" accept=".csv,.tsv,.txt,.zip">
+      <p class="hint" id="fs">Hasil ekspor TikTok Studio (desktop: Analytics, Export Data) atau tool riset. Kolom dikenali otomatis, baik berbahasa Indonesia maupun Inggris.</p>
+    </div>
+    <div id="out"></div>
+  </div>
+
+  <div id="t-tren" class="tab" hidden>
+    <div class="card">
+      <h2>Yang sedang ramai dan prediksinya</h2>
+      <p class="hint" style="margin-top:0">Aplikasi ini tidak bisa melihat TikTok secara langsung, jadi tren dihitung dari data berkolom tanggal yang kamu masukkan. Untuk melihat yang sedang viral di TikTok sekarang, buka Creative Center resmi (ads.tiktok.com/business/creativecenter), lalu masukkan datanya di sini.</p>
+      <div style="margin-top:14px"><button id="bt">Hitung dari data video (menu Analisa)</button></div>
+      <label for="tm" style="margin-top:18px">Atau tempel data deret waktu produk</label>
+      <textarea id="tm" style="min-height:100px" placeholder="nama produk | tanggal | nilai (views atau penjualan)&#10;tumbler 900ml | 2026-10-20 | 1200&#10;tumbler 900ml | 2026-10-27 | 2300"></textarea>
+      <div style="margin-top:12px"><button id="bt2" class="g">Hitung dari data ini</button></div>
+    </div>
+    <div id="rt"></div>
+    <div class="card"><h2>Momen belanja ke depan</h2><div id="mm"></div><p class="hint">Pola musiman umum di Indonesia, bukan data TikTok hari ini. Tanggal hari raya adalah perkiraan, cek kalender resmi. Siapkan konten sekitar 2 sampai 3 minggu sebelum momen.</p></div>
+  </div>
+
+  <div id="t-foto" class="tab" hidden>
+    <div class="card">
+      <label for="ph">Foto produk (untuk pratinjau dan acuan)</label>
+      <input type="file" id="ph" accept="image/*">
+      <div id="pv"></div>
+      <p class="hint">Aplikasi ini tidak membaca isi foto, jadi isi data produk di bawah. Datanya dipakai menu Prompt video, Deskripsi, dan Hashtag. Isian tersimpan otomatis di perangkatmu (hanya di browser ini).</p>
+      <label for="pn" style="margin-top:14px">Nama produk</label>
+      <input id="pn" placeholder="contoh: tumbler stainless 900 ml">
+      <label for="pf" style="margin-top:14px">Fitur utama (pisahkan dengan koma)</label>
+      <input id="pf" placeholder="contoh: tahan panas, muat 900 ml, tutup anti bocor">
+      <label for="pt" style="margin-top:14px">Calon pembeli</label>
+      <input id="pt" placeholder="contoh: pekerja kantoran">
+      <label for="gy" style="margin-top:14px">Gaya konten</label>
+      <select id="gy"><option>Review jujur singkat</option><option>Unboxing</option><option>Estetik dan sinematik</option><option>Tutorial pemakaian</option><option>Problem dan solusi</option></select>
+    </div>
+  </div>
+
+  <div id="t-prompt" class="tab" hidden>
+    <div class="card"><p class="hint" style="margin-top:0">Memakai data dari menu Foto. Prompt disusun dari pola yang umum dipakai di generator video AI (Veo, Kling, Runway, dan sejenisnya).</p><div style="margin-top:12px"><button id="bp">Buat 3 prompt video</button></div></div>
+    <div id="rp"></div>
+  </div>
+
+  <div id="t-desk" class="tab" hidden>
+    <div class="card"><p class="hint" style="margin-top:0">Membuat 3 gaya deskripsi dari data menu Foto.</p><div style="margin-top:12px"><button id="bd">Buat deskripsi</button></div></div>
+    <div id="rd"></div>
+    <div class="card">
+      <label for="ck">Cek kata berisiko di teks sendiri</label>
+      <textarea id="ck" style="min-height:90px" placeholder="tempel deskripsi kamu"></textarea>
+      <div style="margin-top:12px"><button id="bc" class="g">Cek</button></div>
+      <div id="rc"></div>
+    </div>
+  </div>
+
+  <div id="t-hash" class="tab" hidden>
+    <div class="card"><p class="hint" style="margin-top:0">Dibuat dari nama produk, fitur, topik di menu Analisa, dan hashtag umum. Bukan data real-time.</p><div style="margin-top:12px"><button id="bh">Buat hashtag</button></div></div>
+    <div id="rh"></div>
+  </div>
+  <div class="foot">Semua dihitung lokal di browsermu &middot; datamu tidak dikirim ke server mana pun</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+' jt':n>=1e3?(n/1e3).toFixed(1)+' rb':String(Math.round(n));
+const DAY=864e5;
+const STOP=new Set(['yang','dan','di','ke','dari','untuk','ini','itu','aku','kamu','dengan','ada','banget','aja','nya','buat','bisa','jadi','cuma','sama','lagi','udah','kalo','nih','deh','fyp','foryou','foryoupage','viral','xyzbca','tiktok','the','and','for','you','with','racun','racuntiktok','tiktokshop','shop','keranjang','kuning','review','rekomendasi','murah','checkout','link','beli','produk','promo']);
+const G={user:'',top:[],rising:[],pr:[],last:null,man:{}};
+try{G.man=JSON.parse(localStorage.getItem('apv_man')||'{}')}catch(e){}
+const CP=[];
+
+/* ---------- navigasi, salin ---------- */
+function showTab(id){
+  document.querySelectorAll('.nv').forEach(x=>x.classList.toggle('on',x.dataset.t===id));
+  document.querySelectorAll('.tab').forEach(t=>{t.hidden=t.id!=='t-'+id});
+  if(id==='alur')renderFlow();
+  document.querySelectorAll('.nv').forEach(x=>x.setAttribute('aria-selected',x.dataset.t===id?'true':'false'));
+  try{history.replaceState(null,'','#'+id)}catch(e){}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function fromHash(){const id=location.hash.slice(1);if(id&&$('t-'+id))showTab(id)}
+window.addEventListener('hashchange',fromHash);
+document.querySelectorAll('.nv').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)showTab(g.dataset.go)});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-cp]');if(b)cp(+b.dataset.cp,b)});
+function cb(t){CP.push(t);return '<button class="g sm" data-cp="'+(CP.length-1)+'">Salin</button>'}
+function fb(t,done){const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy');done()}catch(e){}x.remove()}
+function cp(i,b){const t=CP[i];const done=()=>{b.textContent='Tersalin'};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,()=>fb(t,done))}else fb(t,done)}
+const toks=s=>(String(s).toLowerCase().match(/#?[a-z0-9]{3,}/g)||[]).map(w=>w.replace('#','')).filter(k=>!STOP.has(k)&&!/^\d+$/.test(k));
+
+/* ---------- efek 3D: kartu miring mengikuti kursor ---------- */
+(function tilt(){
+  if(!window.matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+  if(window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  let cur=null;
+  document.addEventListener('pointermove',e=>{
+    const c=e.target.closest&&e.target.closest('.card');
+    if(cur&&cur!==c){cur.style.transform=''}
+    cur=c;if(!c)return;
+    if(c.querySelector('textarea:focus,input:focus,select:focus'))return;
+    const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+    c.style.setProperty('--mx',x*100+'%');c.style.setProperty('--my',y*100+'%');
+    c.style.transform='perspective(1100px) rotateX('+((.5-y)*3.2).toFixed(2)+'deg) rotateY('+((x-.5)*4.2).toFixed(2)+'deg) translateZ(0)';
+  });
+  document.addEventListener('pointerleave',()=>{if(cur)cur.style.transform=''},true);
+})();
+
+/* ---------- simpan isian otomatis ---------- */
+const KEEP=['u','pn','pf','pt','gy','per','d','tm'];
+KEEP.forEach(id=>{
+  try{const v=localStorage.getItem('apv_'+id);if(v!==null)$(id).value=v}catch(e){}
+  $(id).addEventListener('input',()=>{try{localStorage.setItem('apv_'+id,$(id).value)}catch(e){}});
+  $(id).addEventListener('change',()=>{try{localStorage.setItem('apv_'+id,$(id).value)}catch(e){}});
+});
+
+/* ---------- contoh data ---------- */
+$('ex').onclick=()=>{
+  const C=['Sandal empuk anti licin buat harian #sandal #racuntiktok','Review jujur sandal jepit tebal nyaman dipakai seharian','Sandal slide lembut buat di rumah, kakinya adem','Unboxing sandal wanita kekinian murah banget','Sandal anti licin kamar mandi aman buat orang tua','Tutorial pilih sandal nyaman supaya kaki gak pegal','Sandal pria empuk tahan lama, cek keranjang kuning','Problem kaki pegal? coba sandal empuk ini','Sandal couple lucu buat kado','Sandal karet fleksibel tahan air musim hujan'];
+  const L=[];
+  for(let i=0;i<24;i++){
+    const age=Math.floor(i*1.4);
+    const dt=new Date(Date.now()-age*DAY).toISOString().slice(0,10);
+    const v=Math.round((8000+((i*7919)%9)*9000)*(1+(24-i)/30));
+    L.push(C[i%C.length]+' | '+v+' | '+Math.round(v*(.04+((i*13)%7)/100))+' | '+Math.round(v*.004)+' | '+Math.round(v*(.008+((i*5)%4)/300))+' | '+dt);
+  }
+  $('d').value=L.join('\n');$('d').dispatchEvent(new Event('input'));
+  $('fs').textContent='Contoh data terisi (24 video). Klik Analisa untuk melihat hasilnya.';
+};
+
+/* ---------- parsing data ---------- */
+function num(s){
+  s=String(s||'').toLowerCase().replace(/\s/g,'');
+  const m=s.match(/^([\d.,]+)(k|rb|m|jt)?$/);
+  if(m&&m[2]){const v=parseFloat(m[1].replace(',','.'))||0;return Math.round(v*(m[2]==='k'||m[2]==='rb'?1e3:1e6))}
+  return parseInt(s.replace(/[^\d]/g,''))||0;
+}
+function parse(t){
+  return t.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+    const p=l.split('|').map(x=>x.trim());
+    if(p.length<2)return null;
+    return {cap:p[0],v:num(p[1]),l:num(p[2]),c:num(p[3]),s:num(p[4]),d:p[5]?Date.parse(p[5]):NaN};
+  }).filter(x=>x&&x.v>0);
+}
+function csvRows(t){
+  t=t.replace(/^\uFEFF/,'');
+  const first=t.split('\n')[0]||'';
+  const d=[',',';','\t'].map(x=>[x,first.split(x).length]).sort((a,b)=>b[1]-a[1])[0][0];
+  const out=[];let row=[],cur='',q=false;
+  for(let i=0;i<t.length;i++){
+    const ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}
+    else if(ch==='"')q=true;
+    else if(ch===d){row.push(cur);cur=''}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;row.push(cur);cur='';if(row.some(x=>x.trim()))out.push(row);row=[]}
+    else cur+=ch;
+  }
+  row.push(cur);if(row.some(x=>x.trim()))out.push(row);
+  return out;
+}
+function dstr(s){const t=Date.parse(String(s||'').trim());return isNaN(t)?'':new Date(t).toISOString().slice(0,10)}
+function csvToLines(t){
+  const r=csvRows(t);if(r.length<2)return null;
+  const h=r[0].map(x=>x.toLowerCase().trim());
+  const ic=h.findIndex(x=>/caption|title|judul|deskripsi|description|produk|product|nama|video/.test(x)&&!/view|tayang|play|like|suka|comment|komentar|share|bagikan/.test(x));
+  const iv=h.findIndex(x=>/view|tayang|ditonton|play/.test(x));
+  const il=h.findIndex(x=>/like|suka/.test(x));
+  const im=h.findIndex(x=>/comment|komentar/.test(x));
+  const is=h.findIndex(x=>/share|bagikan/.test(x));
+  const id=h.findIndex(x=>/date|tanggal|posted|dibuat|created/.test(x)&&!/watch|average|rata/.test(x));
+  if(ic<0||iv<0)return null;
+  return r.slice(1).map(c=>[(c[ic]||'').replace(/\|/g,'/').replace(/\s+/g,' ').trim(),num(c[iv]),il<0?0:num(c[il]),im<0?0:num(c[im]),is<0?0:num(c[is]),id<0?'':dstr(c[id])]).filter(x=>x[1]>0).map(x=>x.join(' | '));
+}
+$('f').addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;
+  const st=$('fs');
+  try{
+    let lines=null,src=f.name;
+    if(/\.zip$/i.test(f.name)){
+      if(!window.JSZip){st.textContent='Pembaca ZIP gagal dimuat. Ekstrak ZIP-nya dulu, lalu unggah file CSV di dalamnya.';return}
+      const z=await JSZip.loadAsync(f);
+      const all=Object.keys(z.files);
+      const names=all.filter(n=>!z.files[n].dir&&/\.(csv|tsv|txt)$/i.test(n)&&!/__MACOSX/.test(n));
+      for(const n of names){const l=csvToLines(await z.files[n].async('string'));if(l&&l.length){lines=l;src=f.name+' > '+n;break}}
+      if(!lines){st.textContent='ZIP terbaca ('+all.length+' berkas) tapi tidak ada CSV yang berisi kolom caption/judul dan views. Isi ZIP: '+all.slice(0,6).join(', ')+'. Arsip data pribadi TikTok biasanya bukan data performa video; pakai Export Data di TikTok Studio.';return}
+    }else lines=csvToLines(await f.text());
+    if(!lines||!lines.length){st.textContent='Kolom tidak dikenali. Pastikan ada kolom caption/judul dan views, dengan baris header di paling atas.';return}
+    $('d').value=lines.join('\n');$('d').dispatchEvent(new Event('input'));
+    st.textContent=lines.length+' video terbaca dari '+src+'. Klik Analisa untuk memproses.';
+  }catch(err){st.textContent='File gagal dibaca. Coba simpan ulang sebagai CSV (UTF-8).'}
+});
+
+/* ---------- analisa ---------- */
+function analyze(rows){
+  rows.forEach(r=>{r.er=(r.l+r.c+r.s)/r.v*100;r.sr=r.s/r.v*100});
+  const avgV=rows.reduce((a,r)=>a+r.v,0)/rows.length;
+  const maxEr=Math.max(...rows.map(r=>r.er))||1;
+  rows.forEach(r=>{
+    const reach=Math.min(r.v/(avgV*3),1);
+    r.score=Math.round(reach*50+(r.er/maxEr)*30+Math.min(r.sr*8,20));
+    r.aff=/racun|checkout|keranjang|tiktokshop|tiktok shop|shopee|review|rekomendasi|link|beli/i.test(r.cap);
+  });
+  rows.sort((a,b)=>b.score-a.score);
+  const m={};
+  rows.forEach(r=>{new Set(toks(r.cap)).forEach(k=>{const o=m[k]||(m[k]={k,v:0,n:0,sc:0});o.v+=r.v;o.n++;o.sc+=r.score})});
+  const topics=Object.values(m).sort((x,y)=>y.v-x.v).slice(0,10);
+  const top=Object.values(m).sort((x,y)=>y.sc-x.sc).slice(0,12).map(o=>o.k);
+  return {rows,topics,top,avgV,avgEr:rows.reduce((a,r)=>a+r.er,0)/rows.length,aff:rows.filter(r=>r.aff).length};
+}
+function verdict(a){
+  const er=a.avgEr,best=a.rows[0];
+  const lvl=er>=8?'sangat bagus':er>=5?'bagus':er>=3?'cukup':'rendah';
+  const share=Math.round(a.aff/a.rows.length*100);
+  return '<div class="card big"><h2>Kesimpulan cepat'+(G.user?' untuk @'+esc(G.user):'')+'</h2><p>Dari <b>'+a.rows.length+' video</b>, tingkat interaksi rata-rata <b>'+er.toFixed(1)+'%</b> ('+lvl+', patokan kasar).</p><p>Video terbaik: <b>\u201c'+esc(best.cap.slice(0,70))+'\u201d</b> dengan skor '+best.score+' dari 100.</p><p class="hint">'+share+'% video bernuansa jualan. '+(share<30?'Konten jualan masih sedikit, ada ruang untuk menambah.':'Konten jualan sudah banyak, jaga variasi hook agar tidak monoton.')+'</p></div>';
+}
+function saran(a){
+  const s=[],r=a.rows,b=r[0],share=a.aff/r.length;
+  if(a.avgEr<3)s.push('Interaksi masih rendah. Perkuat 3 detik pertama (hook) dan akhiri video dengan pertanyaan agar penonton berkomentar.');
+  else if(a.avgEr>=5)s.push('Interaksi sudah bagus. Pertahankan gaya videomu dan perbanyak produksi, bukan ganti gaya.');
+  else s.push('Interaksi cukup. Uji 2 hook berbeda untuk topik yang sama dan lihat mana yang lebih ditonton.');
+  if(a.topics[0])s.push('Topik "'+a.topics[0].k+'" paling banyak ditonton di datamu. Buat 3 variasi: review singkat, perbandingan, dan tutorial.');
+  s.push('Ulangi format video teratasmu ("'+b.cap.slice(0,50)+'", skor '+b.score+'). Buat versi baru dengan hook berbeda, jangan menyalin persis.');
+  s.push(share<0.3?'Baru '+Math.round(share*100)+'% videomu bernuansa jualan. Selipkan konten produk minimal 1 dari 3 video.':'Konten jualanmu sudah banyak. Selang-seling dengan konten hiburan atau tips agar akun tidak terasa iklan terus.');
+  const hi=[...r].sort((x,y)=>y.sr-x.sr)[0];
+  if(hi&&hi.sr>0)s.push('Video dengan share tertinggi: "'+hi.cap.slice(0,50)+'". Konten yang bermanfaat atau lucu mudah dibagikan, coba buat lagi yang mirip.');
+  const dated=r.filter(x=>!isNaN(x.d));
+  if(dated.length>=3){const span=(Math.max(...dated.map(x=>x.d))-Math.min(...dated.map(x=>x.d)))/(7*DAY)||1;const pw=dated.length/Math.max(span,1);if(pw<3)s.push('Frekuensi posting sekitar '+pw.toFixed(1)+' video per minggu. Coba naikkan ke minimal 3 per minggu.')}
+  s.push('Sebelum promosi produk, cek di Affiliate Center TikTok Shop: komisi, jumlah affiliate lain, rating, dan ulasan. Jangan promosikan produk yang kualitasnya belum kamu pastikan.');
+  return '<div class="card"><h2>Saran untuk kamu</h2><ol class="steps">'+s.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol><p class="hint">Saran dihitung dari aturan sederhana atas datamu, bukan AI.</p></div>';
+}
+function topicsCard(a){
+  if(!a.topics.length)return '';
+  const mx=a.topics[0].v;
+  return '<div class="card"><h2>Topik paling diminati (urut dari teratas)</h2>'+a.topics.map((o,i)=>'<div class="rk"><span class="no">'+(i+1)+'</span><div class="tr"><b>'+esc(o.k)+'</b> <span class="hint">'+fmt(o.v)+' views, '+o.n+' video</span><div class="bar"><i style="width:'+Math.round(o.v/mx*100)+'%"></i></div></div></div>').join('')+'</div>';
+}
+function render(a){
+  let h=verdict(a)+saran(a)+topicsCard(a);
+  h+='<div class="card"><h2>Ringkasan data</h2><div class="stats">'+
+   '<div class="st"><b>'+a.rows.length+'</b><span>video dianalisa</span></div>'+
+   '<div class="st"><b>'+fmt(a.avgV)+'</b><span>rata-rata views</span></div>'+
+   '<div class="st"><b>'+a.avgEr.toFixed(1)+'%</b><span>rata-rata engagement</span></div>'+
+   '<div class="st"><b>'+a.aff+'</b><span>video bernuansa jualan</span></div></div></div>';
+  h+='<div class="card"><h2>Peringkat video (skor viral)</h2><div class="wrap"><table><tr><th>#</th><th>Caption</th><th>Views</th><th>Eng.</th><th>Skor</th></tr>'+
+   a.rows.slice(0,15).map((r,i)=>'<tr><td>'+(i+1)+'</td><td class="c">'+esc(r.cap.slice(0,90))+'</td><td>'+fmt(r.v)+'</td><td>'+r.er.toFixed(1)+'%</td><td><div class="bar"><i style="width:'+r.score+'%"></i></div>'+r.score+'</td></tr>').join('')+
+   '</table></div><p class="hint">Skor = jangkauan (50%) + engagement (30%) + share (20%), relatif terhadap video lain di akun yang sama.</p><div class="btns"><button class="g sm" id="xp">Unduh peringkat (CSV)</button></div></div>';
+  return h;
+}
+function filtered(){
+  let rows=parse($('d').value);
+  const per=parseInt($('per').value)||0;let note='';
+  if(per&&rows.some(r=>!isNaN(r.d))){const cut=Date.now()-per*DAY;const f=rows.filter(r=>r.d>=cut);if(f.length)rows=f;else note='Tidak ada video dalam '+per+' hari terakhir, jadi semua video dipakai.'}
+  else if(per)note='Data tidak punya kolom tanggal, jadi semua video dipakai.';
+  return {rows,note};
+}
+$('go').onclick=()=>{
+  G.user=$('u').value.trim().replace(/^@/,'');
+  const {rows,note}=filtered();
+  if(!rows.length){$('out').innerHTML='<div class="card warn">Tempel data video atau unggah file CSV/ZIP dulu. Tanpa data, tidak ada yang bisa dianalisa.</div>';return}
+  const a=analyze(rows);G.top=a.top;G.last=a;
+  $('out').innerHTML=(note?'<div class="card warn">'+esc(note)+'</div>':'')+render(a);
+  $('out').scrollIntoView({behavior:'smooth',block:'start'});
+};
+$('u').addEventListener('keydown',e=>{if(e.key==='Enter')$('go').click()});
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#xp')||!G.last)return;
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const L=['caption,views,likes,komentar,share,engagement_persen,skor,tanggal'].concat(G.last.rows.map(r=>[q(r.cap),r.v,r.l,r.c,r.s,r.er.toFixed(2),r.score,isNaN(r.d)?'':new Date(r.d).toISOString().slice(0,10)].join(',')));
+  const u=URL.createObjectURL(new Blob(['\uFEFF'+L.join('\n')],{type:'text/csv;charset=utf-8'}));
+  const a=document.createElement('a');a.href=u;a.download='peringkat-video'+(G.user?'-'+G.user:'')+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+});
+$('rs').onclick=()=>{
+  $('d').value='';$('out').innerHTML='';G.top=[];G.last=null;
+  $('fs').textContent='Data dikosongkan.';
+  try{localStorage.removeItem('apv_d')}catch(e){}
+};
+
+/* ---------- tren dan prediksi ---------- */
+function trendItems(map){
+  const all=[].concat(...Object.values(map));
+  if(!all.length)return null;
+  const tmax=Math.max(...all.map(p=>p.t)),tmin=Math.min(...all.map(p=>p.t));
+  const W=Math.min(8,Math.floor((tmax-tmin)/(7*DAY))+1);
+  if(W<2)return {W,items:[],tmax};
+  const sum=a=>a.reduce((x,y)=>x+y,0);
+  const items=Object.entries(map).map(([name,pts])=>{
+    const s=new Array(W).fill(0);let n=0;
+    pts.forEach(p=>{const k=Math.floor((tmax-p.t)/(7*DAY));if(k<W){s[W-1-k]+=p.v;n++}});
+    return {name,s,n};
+  }).filter(i=>i.n>0);
+  items.forEach(i=>{
+    const s=i.s,h=Math.min(2,Math.floor(W/2));
+    i.rec=sum(s.slice(-h));const prev=sum(s.slice(-2*h,-h));
+    i.growth=prev>0?(i.rec-prev)/prev:(i.rec>0?Infinity:0);
+    const mx=(W-1)/2,my=sum(s)/W;let nu=0,de=0;
+    s.forEach((y,x)=>{nu+=(x-mx)*(y-my);de+=(x-mx)**2});
+    const sl=de?nu/de:0,ic=my-sl*mx;
+    i.fc=[Math.max(0,ic+sl*W),Math.max(0,ic+sl*(W+1))];
+    const recAvg=i.rec/h;
+    i.fgrow=recAvg>0?((i.fc[0]+i.fc[1])/2-recAvg)/recAvg:0;
+    const first=s.findIndex(v=>v>0);
+    i.label=(W>=4&&first>=W-2)?'Baru muncul':i.growth>0.5?'Naik cepat':i.growth>0.1?'Naik':i.growth>=-0.1?'Stabil':'Turun';
+    i.conf=(W>=6&&i.n>=8)?'cukup':(W>=4&&i.n>=4)?'sedang':'rendah';
+  });
+  return {W,items,tmax};
+}
+function spark(i){
+  const mx=Math.max(...i.s,...i.fc,1),w=10,h=34;let b='';
+  i.s.forEach((v,x)=>{const bh=Math.max(1,v/mx*h);b+='<rect x="'+x*(w+2)+'" y="'+(h-bh)+'" width="'+w+'" height="'+bh+'" rx="2" fill="var(--ac)" style="animation-delay:'+x*60+'ms"/>'});
+  i.fc.forEach((v,k)=>{const x=i.s.length+k,bh=Math.max(1,v/mx*h);b+='<rect x="'+x*(w+2)+'" y="'+(h-bh)+'" width="'+w+'" height="'+bh+'" rx="2" fill="var(--ac2)" opacity=".75" style="animation-delay:'+x*60+'ms"/>'});
+  return '<svg width="'+(i.s.length+2)*(w+2)+'" height="'+h+'" role="img" aria-label="grafik mingguan dan perkiraan">'+b+'</svg>';
+}
+function trendRow(i,no,unit){
+  const g=isFinite(i.growth)?(i.growth>=0?'+':'')+Math.round(i.growth*100)+'%':'baru';
+  const f=(i.fgrow>=0?'+':'')+Math.round(i.fgrow*100)+'%';
+  const cls=/Naik|Baru/.test(i.label)?'up':i.label==='Turun'?'dn':'';
+  return '<div class="rk top"><span class="no">'+no+'</span><div class="tr"><b>'+esc(i.name)+'</b> <span class="tag '+cls+'">'+i.label+'</span><span class="tag">keyakinan '+i.conf+'</span>'+
+   '<div class="hint">2 minggu terakhir: '+fmt(i.rec)+' '+unit+' ('+g+' dari periode sebelumnya)</div>'+
+   '<div class="hint">Perkiraan 2 minggu ke depan: sekitar '+fmt((i.fc[0]+i.fc[1])/2)+' '+unit+' per minggu ('+f+' dari sekarang)</div>'+
+   '<div style="margin-top:6px">'+spark(i)+'</div></div></div>';
+}
+function showTrend(map,unit){
+  const el=$('rt'),T=trendItems(map);
+  if(!T){el.innerHTML='<div class="card warn">Tidak ada data bertanggal. Pastikan ada kolom tanggal (contoh 2026-11-02).</div>';return}
+  if(T.W<2||!T.items.length){el.innerHTML='<div class="card warn">Rentang tanggal data kurang dari 2 minggu, belum cukup untuk menghitung tren. Masukkan data minimal 3 sampai 4 minggu.</div>';return}
+  const days=Math.round((Date.now()-T.tmax)/DAY);
+  const its=T.items;
+  const now=[...its].sort((a,b)=>b.rec-a.rec).slice(0,8);
+  const up=its.filter(i=>/Naik|Baru/.test(i.label)&&i.fgrow>0).sort((a,b)=>b.fgrow-a.fgrow).slice(0,5);
+  const dn=its.filter(i=>i.label==='Turun').sort((a,b)=>a.growth-b.growth).slice(0,3);
+  G.rising=up.map(i=>i.name);
+  let h='';
+  if(days>14)h+='<div class="card warn">Data terakhirmu bertanggal '+new Date(T.tmax).toISOString().slice(0,10)+' ('+days+' hari lalu). Tren mungkin sudah berubah, gunakan data yang lebih baru.</div>';
+  h+='<div class="card"><h2>Lagi ramai (urut dari teratas)</h2>'+now.map((i,k)=>trendRow(i,k+1,unit)).join('')+'<p class="hint">Batang kuning = per minggu (lama ke baru). Batang biru kehijauan = perkiraan 2 minggu ke depan.</p></div>';
+  h+='<div class="card"><h2>Diperkirakan naik</h2>'+(up.length?up.map((i,k)=>trendRow(i,k+1,unit)).join(''):'<p class="hint">Belum ada yang menunjukkan kenaikan jelas.</p>')+'</div>';
+  if(dn.length)h+='<div class="card"><h2>Mulai turun</h2>'+dn.map((i,k)=>trendRow(i,k+1,unit)).join('')+'</div>';
+  h+='<div class="card warn">Prediksi memakai garis tren sederhana dari data mingguan ('+T.W+' minggu), jadi hanya perkiraan kasar. Makin sedikit data, makin rendah keyakinannya. Tren TikTok bisa berubah cepat, jadi jangan jadikan ini satu-satunya dasar keputusan.</div>';
+  el.innerHTML=h;
+}
+$('bt').onclick=()=>{
+  const rows=parse($('d').value).filter(r=>!isNaN(r.d));
+  if(!rows.length){$('rt').innerHTML='<div class="card warn">Data di menu Analisa belum ada atau tidak punya kolom tanggal. Isi data dulu di menu Analisa.</div>';return}
+  const m={};
+  rows.forEach(r=>{new Set(toks(r.cap)).forEach(k=>{(m[k]||(m[k]=[])).push({t:r.d,v:r.v})})});
+  const map={};
+  Object.entries(m).filter(([,p])=>p.length>=2).sort((a,b)=>b[1].reduce((x,p)=>x+p.v,0)-a[1].reduce((x,p)=>x+p.v,0)).slice(0,15).forEach(([k,p])=>map[k]=p);
+  showTrend(map,'views');
+};
+$('bt2').onclick=()=>{
+  const map={};
+  $('tm').value.split('\n').forEach(l=>{
+    const p=l.split('|').map(x=>x.trim());
+    if(p.length<3)return;
+    const t=Date.parse(p[1]),v=num(p[2]);
+    if(!p[0]||isNaN(t)||!v)return;
+    (map[p[0]]||(map[p[0]]=[])).push({t,v});
+  });
+  showTrend(map,'poin');
+};
+(function moments(){
+  const now=new Date();const t0=Date.now();
+  let g=new Date(now.getFullYear(),now.getMonth(),25);if(g<now)g=new Date(now.getFullYear(),now.getMonth()+1,25);
+  const M=[
+   ['11.11 (belanja diskon)',new Date(2026,10,11),'Elektronik kecil, fashion, perlengkapan rumah, produk perawatan harian.'],
+   ['12.12 (belanja diskon)',new Date(2026,11,12),'Mirip 11.11: diskon besar dan gratis ongkir mendorong checkout.'],
+   ['Natal dan Tahun Baru',new Date(2026,11,25),'Kado, dekorasi, perlengkapan liburan dan perjalanan.'],
+   ['Gajian akhir bulan (tanggal 25)',g,'Belanja rutin naik: kebutuhan harian, fashion, elektronik kecil.'],
+   ['Imlek 2027',new Date(2027,1,6),'Dekorasi, hampers, busana merah.'],
+   ['Ramadan 2027 (perkiraan)',new Date(2027,1,8),'Busana muslim, perlengkapan masak, kue dan hampers, perlengkapan ibadah.'],
+   ['Idul Fitri 2027 (perkiraan)',new Date(2027,2,10),'Parcel, busana, perlengkapan mudik.'],
+   ['Idul Adha 2027 (perkiraan)',new Date(2027,4,16),'Busana, perlengkapan masak dan acara keluarga.'],
+   ['Tahun ajaran baru 2027 (perkiraan)',new Date(2027,6,13),'Tas, sepatu, alat tulis, perlengkapan sekolah.']
+  ].map(x=>({n:x[0],d:x[1],s:x[2],days:Math.ceil((x[1].getTime()-t0)/DAY)})).filter(x=>x.days>=0&&x.days<=200).sort((a,b)=>a.days-b.days);
+  $('mm').innerHTML=M.map((x,i)=>'<div class="rk top"><span class="no">'+(i+1)+'</span><div class="tr"><b>'+esc(x.n)+'</b> <span class="tag">'+(x.days===0?'hari ini':x.days+' hari lagi')+'</span><div class="hint">'+esc(x.s)+'</div></div></div>').join('')+
+   '<div class="rk top"><span class="no">+</span><div class="tr"><b>Musim hujan</b> <span class="tag">umumnya Nov sampai Mar</span><div class="hint">Di banyak wilayah: jas hujan, payung, sepatu anti air, tas anti air.</div></div></div>';
+})();
+
+/* ---------- foto dan data produk ---------- */
+$('ph').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{$('pv').innerHTML='<img src="'+r.result+'" alt="Foto produk">'};
+  r.readAsDataURL(f);
+});
+function prod(){return {p:$('pn').value.trim(),f:$('pf').value.split(',').map(x=>x.trim()).filter(Boolean),t:$('pt').value.trim()}}
+const NEED='<div class="card warn">Isi nama produk di menu Foto dulu.</div>';
+
+/* ---------- prompt video ---------- */
+const GAYA={
+ 'Review jujur singkat':['handheld smartphone feel, slight natural shake, medium close-up','soft daylight from a window','authentic UGC, casual and honest'],
+ 'Unboxing':['top-down then eye-level, hands opening the package','bright even light','satisfying unboxing'],
+ 'Estetik dan sinematik':['slow cinematic dolly-in, shallow depth of field','warm golden-hour light with soft shadows','cinematic, minimal, premium'],
+ 'Tutorial pemakaian':['stable tripod, medium shot, clear step-by-step actions','bright neutral light','clean and instructional'],
+ 'Problem dan solusi':['quick cut from the problem moment to the solution, handheld','natural light, from slightly dim to bright','relatable and punchy']
+};
+$('bp').onclick=()=>{
+  const {p,f,t}=prod();
+  if(!p){$('rp').innerHTML=NEED;return}
+  const g=GAYA[$('gy').value],fe=f.length?' Key features to show: '+f.slice(0,3).join(', ')+'.':'',tg=t||'a typical buyer';
+  const V=[
+   ['Close-up produk','Close-up hero shot of '+p+' on a clean surface, slowly rotating to reveal its details.','Close-up produk di permukaan bersih, berputar pelan memperlihatkan detail.','Cocok sebagai pembuka yang langsung menunjukkan produk.'],
+   ['Dipakai sehari-hari','A person ('+tg+') naturally using '+p+' in a real everyday setting, genuine reaction.','Calon pembeli memakai produk dalam situasi sehari-hari dengan reaksi alami.','Membantu penonton membayangkan dirinya memakai produk.'],
+   ['Detail dan akhir','Macro detail shots of '+p+' showing texture, material and key parts, ending on a clean product-in-hand shot.','Detail dekat tekstur, bahan, dan bagian penting, ditutup produk di tangan.','Cocok untuk penutup sebelum ajakan cek keranjang kuning.']
+  ];
+  G.pr=[];
+  $('rp').innerHTML=V.map((v,i)=>{const pr='Vertical 9:16, 6 seconds. '+v[1]+fe+' Camera: '+g[0]+'. Lighting: '+g[1]+'. Style: '+g[2]+'. No on-screen text, no watermark, realistic proportions.';G.pr[i]=pr;
+   return '<div class="card"><h2>'+(i+1)+'. '+esc(v[0])+'</h2><pre class="pre">'+esc(pr)+'</pre>'+cb(pr)+'<p class="hint">Artinya: '+esc(v[2])+'</p><p class="hint">Tips: '+esc(v[3])+'</p></div>'}).join('')+
+   '<p class="hint">Prompt disusun dari template, bukan AI. Sesuaikan lalu uji di generator videomu, dan tulis dalam bahasa Inggris untuk hasil yang umumnya lebih baik.</p>';
+};
+
+/* ---------- deskripsi ---------- */
+const RISK=['sembuh','menyembuhkan','obat','100%','100 persen','nomor 1','no 1','no.1','terbaik','dijamin','pasti','permanen','tanpa efek samping','instan','ampuh','termurah','paling murah','asli 100'];
+$('bd').onclick=()=>{
+  const {p,f,t}=prod();
+  if(!p){$('rd').innerHTML=NEED;return}
+  const fl=f.length?f.slice(0,3).join(', '):'',f1=f[0]||'',tg=t||'kamu';
+  const D=[
+   ['Santai','Nemu '+p+' yang bikin hari-hari lebih gampang.'+(f1?' '+f1.charAt(0).toUpperCase()+f1.slice(1)+'.':'')+' Cocok buat '+tg+'. Cek keranjang kuning ya!'],
+   ['Jualan halus','Lagi cari '+p+'?'+(fl?' Ini yang kamu dapat: '+fl+'.':'')+' Cek detail, harga, dan ulasannya dulu di keranjang kuning.'],
+   ['Storytelling','Awalnya cuma coba-coba, ternyata '+p+' kepakai terus.'+(f1?' '+f1.charAt(0).toUpperCase()+f1.slice(1)+'.':'')+' Kalau kamu '+(t?'seorang '+t:'butuh produk seperti ini')+', mungkin cocok juga. Linknya di keranjang kuning.']
+  ];
+  $('rd').innerHTML=D.map(d=>'<div class="card"><h2>'+esc(d[0])+'</h2><p style="white-space:pre-wrap">'+esc(d[1])+'</p>'+cb(d[1])+'</div>').join('')+
+   '<p class="hint">Dibuat dari template. Kalimat pengalaman pada gaya Storytelling hanya boleh dipakai jika kamu benar-benar sudah memakai produknya. Jangan menambah klaim yang tidak bisa dibuktikan.</p>';
+};
+$('bc').onclick=()=>{
+  const t=$('ck').value.toLowerCase();
+  if(!t.trim()){$('rc').innerHTML='<p class="hint">Tempel teks dulu.</p>';return}
+  const hit=RISK.filter(w=>t.includes(w));
+  $('rc').innerHTML=hit.length?'<p style="margin-top:10px">Kata yang sebaiknya dihindari atau dibuktikan: '+hit.map(w=>'<span class="tag dn">'+esc(w)+'</span>').join('')+'</p><p class="hint">Klaim berlebihan atau soal kesehatan bisa membuat video dibatasi dan menyesatkan pembeli. Ganti dengan fakta yang bisa dicek.</p>':'<p class="hint" style="margin-top:10px">Tidak ditemukan kata berisiko dari daftar sederhana ini. Tetap baca ulang sendiri.</p>';
+};
+
+/* ---------- hashtag ---------- */
+$('bh').onclick=()=>{
+  const {p,f,t}=prod();
+  if(!p&&!G.top.length){$('rh').innerHTML='<div class="card warn">Isi nama produk di menu Foto, atau jalankan Analisa dulu.</div>';return}
+  const slug=s=>'#'+String(s).toLowerCase().replace(/[^a-z0-9]/g,'');
+  const uniq=a=>[...new Set(a.filter(x=>x.length>2))];
+  const main=uniq([p?slug(p):'',G.top[0]?slug(G.top[0]):'','#racuntiktok','#tiktokshop','#fyp']).slice(0,5);
+  const niche=uniq([...f.slice(0,3).map(slug),...(t?[slug(t)]:[]),...G.top.slice(1,5).map(slug),...G.rising.slice(0,3).map(slug)]).filter(x=>!main.includes(x)).slice(0,5);
+  const umum=['#rekomendasi','#reviewjujur','#belanjaonline','#keranjangkuning','#produkviral'].filter(x=>!main.includes(x));
+  const chips=a=>a.map(x=>'<span class="tag">'+esc(x)+'</span>').join('');
+  $('rh').innerHTML='<div class="card"><h2>5 hashtag utama</h2><p>'+chips(main)+'</p>'+cb(main.join(' '))+(niche.length?'<h3>Niche (dari produk dan topik)</h3><p>'+chips(niche)+'</p>'+cb(niche.join(' ')):'')+'<h3>Umum dipakai</h3><p>'+chips(umum)+'</p><p class="hint">Disusun otomatis dari kata kunci, bukan data real-time. Cek hashtag yang sedang naik di TikTok Creative Center, dan pakai sedikit saja (3 sampai 5) agar relevan.</p></div>';
+};
+
+/* ---------- alur kerja ---------- */
+function renderFlow(){
+  const has=id=>$(id).innerHTML.trim().length>0;
+  const S=[
+   ['Analisa data video','Masukkan atau unggah data videomu untuk tahu video dan topik yang paling berhasil.','analisa',G.top.length>0],
+   ['Cek tren dan momen','Lihat produk yang naik dan momen belanja terdekat.','tren',has('rt')],
+   ['Isi data produk','Nama produk, fitur, calon pembeli, dan gaya konten.','foto',!!$('pn').value.trim()],
+   ['Buat prompt video','Susun 3 prompt untuk generator video AI.','prompt',G.pr.length>0],
+   ['Buat video di generator AI','Pakai prompt di Veo, Kling, Runway, atau sejenisnya. Langkah ini dilakukan di luar aplikasi.',null,!!G.man.gen,'gen'],
+   ['Deskripsi dan hashtag','Buat teks postingan dan hashtag, lalu cek kata berisiko.','desk',has('rd')||has('rh')],
+   ['Unggah ke TikTok','Posting, lalu masukkan lagi datanya ke Analisa untuk putaran berikutnya.',null,!!G.man.up,'up']
+  ];
+  const done=S.filter(s=>s[3]).length;
+  $('fl').innerHTML='<div class="hint" style="margin:0 0 4px">'+done+' dari '+S.length+' langkah terisi</div><div class="prog"><i style="width:'+Math.round(done/S.length*100)+'%"></i></div><div class="flow">'+
+   S.map((s,i)=>'<div class="stp'+(s[3]?' ok':'')+'" style="animation-delay:'+i*60+'ms"><span class="no">'+(s[3]?'\u2713':i+1)+'</span><div class="tr"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p>'+
+     (s[2]?'<button class="g sm" data-go="'+s[2]+'">Buka menu</button>':'<button class="g sm" data-mark="'+s[4]+'">'+(s[3]?'Batalkan tanda':'Tandai selesai')+'</button> <span class="tag">di luar aplikasi</span>')+'</div></div>').join('')+'</div>';
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-mark]');if(!b)return;
+  const k=b.dataset.mark;G.man[k]=!G.man[k];
+  try{localStorage.setItem('apv_man',JSON.stringify(G.man))}catch(err){}
+  renderFlow();
+});
+$('pn').addEventListener('input',()=>{if(!$('t-alur').hidden)renderFlow()});
+fromHash();
+renderFlow();
+</script>
+</body>
+</html>
